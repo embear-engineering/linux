@@ -1281,6 +1281,9 @@ static int ili9881c_dsi_probe(struct mipi_dsi_device *dsi)
 	struct ili9881c *ctx;
 	int ret;
 
+	dump_stack();
+	pr_info("%s - %s:%d\n", __func__, __FILE__, __LINE__);
+
 	ctx = devm_kzalloc(&dsi->dev, sizeof(*ctx), GFP_KERNEL);
 	if (!ctx)
 		return -ENOMEM;
@@ -1296,11 +1299,14 @@ static int ili9881c_dsi_probe(struct mipi_dsi_device *dsi)
 		return dev_err_probe(&dsi->dev, PTR_ERR(ctx->power),
 				     "Couldn't get our power regulator\n");
 
+	pr_info("%s - %s:%d\n", __func__, __FILE__, __LINE__);
+
 	ctx->reset = devm_gpiod_get_optional(&dsi->dev, "reset", GPIOD_OUT_LOW);
 	if (IS_ERR(ctx->reset))
 		return dev_err_probe(&dsi->dev, PTR_ERR(ctx->reset),
 				     "Couldn't get our reset GPIO\n");
 
+	pr_info("%s - %s:%d\n", __func__, __FILE__, __LINE__);
 	ret = of_drm_get_panel_orientation(dsi->dev.of_node, &ctx->orientation);
 	if (ret) {
 		dev_err(&dsi->dev, "%pOF: failed to get orientation: %d\n",
@@ -1308,18 +1314,21 @@ static int ili9881c_dsi_probe(struct mipi_dsi_device *dsi)
 		return ret;
 	}
 
+	pr_info("%s - %s:%d\n", __func__, __FILE__, __LINE__);
 	ctx->panel.prepare_prev_first = true;
 
 	ret = drm_panel_of_backlight(&ctx->panel);
 	if (ret)
 		return ret;
 
+	pr_info("%s - %s:%d\n", __func__, __FILE__, __LINE__);
 	drm_panel_add(&ctx->panel);
 
 	dsi->mode_flags = ctx->desc->mode_flags;
 	dsi->format = MIPI_DSI_FMT_RGB888;
 	dsi->lanes = 4;
 
+	pr_info("%s - %s:%d\n", __func__, __FILE__, __LINE__);
 	return mipi_dsi_attach(dsi);
 }
 
