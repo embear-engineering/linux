@@ -6,6 +6,11 @@
  * https://www.toradex.com/products/carrier-board/verdin-development-board-kit
  */
 
+#include <dt-bindings/gpio/gpio.h>
+#include <dt-bindings/interrupt-controller/irq.h>
+#include <dt-bindings/pwm/pwm.h>
+#include "k3-pinctrl.h"
+
 /dts-v1/;
 
 #include "k3-am625.dtsi"
@@ -19,4 +24,55 @@
 		     "toradex,verdin-am62-wifi",
 		     "toradex,verdin-am62",
 		     "ti,am625";
+
+	reg_dsi_panel: reg_dsi_panel {
+		compatible = "regulator-fixed";
+		regulator-name = "VCC-PANEL";
+	};
+
+	backlight_dsi_panel: backlight_dsi_panel {
+		compatible = "pwm-backlight";
+		pwms = <&epwm1 0 5000000 0>;
+	};
+};
+
+&dsi_bridge {
+	#address-cells = <1>;
+	#size-cells = <0>;
+	status = "okay";
+
+	panel_mipi_w552946aba: panel@0 {
+		compatible = "wanchanglong,w552946aba", "ilitek,ili9881c";
+		reg = <0>;
+		power-supply = <&reg_dsi_panel>;
+		backlight = <&backlight_dsi_panel>;
+
+		port {
+			panel_mipi_w552946aba_in: endpoint {
+				remote-endpoint = <&mipi_dsi_bridge1_out>;
+			};
+		};
+	};
+};
+
+&dsi_bridge_ports {
+	#address-cells = <1>;
+	#size-cells = <0>;
+
+	port@1 {
+		reg = <1>;
+
+		mipi_dsi_bridge1_out: endpoint {
+			remote-endpoint = <&panel_mipi_w552946aba_in>;
+		};
+	};
+};
+
+&dss {
+	status = "okay";
+};
+
+/* Verdin PWM_3_DSI */
+&epwm1 {
+	status = "okay";
 };
